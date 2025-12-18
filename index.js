@@ -27,6 +27,7 @@ async function run() {
         await client.connect();
         const db = client.db("scholarshipDB");
         const usersCollection = db.collection("users");
+        const scholarshipsCollection = db.collection("scholarships");
 
         app.post("/users", async (req, res) => {
             try {
@@ -55,6 +56,59 @@ async function run() {
             } catch (error) {
                 console.error("Failed to fetch users", error);
                 res.status(500).send({ message: "Failed to fetch users." });
+            }
+        });
+
+        app.post("/scholarships", async (req, res) => {
+            try {
+                const {
+                    scholarshipName,
+                    universityName,
+                    image,
+                    country,
+                    city,
+                    worldRank,
+                    subjectCategory,
+                    scholarshipCategory,
+                    degree,
+                    tuitionFees,
+                    applicationFees,
+                    serviceCharge,
+                    deadline
+                } = req.body;
+
+                const scholarship = {
+                    scholarshipName,
+                    universityName,
+                    image,
+                    country,
+                    city,
+                    worldRank,
+                    subjectCategory,
+                    scholarshipCategory,
+                    degree,
+                    tuitionFees,
+                    applicationFees,
+                    serviceCharge,
+                    deadline,
+                    createdAt: new Date()
+                };
+
+                const result = await scholarshipsCollection.insertOne(scholarship);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to create scholarship", error);
+                res.status(500).send({ message: "Failed to create scholarship." });
+            }
+        });
+
+        app.get("/scholarships", async (req, res) => {
+            try {
+                const scholarships = await scholarshipsCollection.find().sort({ createdAt: -1 }).toArray();
+                res.send(scholarships);
+            } catch (error) {
+                console.error("Failed to fetch scholarships", error);
+                res.status(500).send({ message: "Failed to fetch scholarships." });
             }
         });
     } catch (error) {
