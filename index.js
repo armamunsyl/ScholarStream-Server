@@ -28,6 +28,7 @@ async function run() {
         const db = client.db("scholarshipDB");
         const usersCollection = db.collection("users");
         const scholarshipsCollection = db.collection("scholarships");
+        const applicationsCollection = db.collection("applications");
 
         app.post("/users", async (req, res) => {
             try {
@@ -109,6 +110,37 @@ async function run() {
             } catch (error) {
                 console.error("Failed to fetch scholarships", error);
                 res.status(500).send({ message: "Failed to fetch scholarships." });
+            }
+        });
+
+        app.post("/applications", async (req, res) => {
+            try {
+                const { studentEmail, studentName, universityName } = req.body;
+
+                const application = {
+                    studentEmail,
+                    studentName,
+                    universityName,
+                    status: "pending",
+                    payment: "unpaid",
+                    createdAt: new Date()
+                };
+
+                const result = await applicationsCollection.insertOne(application);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to create application", error);
+                res.status(500).send({ message: "Failed to create application." });
+            }
+        });
+
+        app.get("/applications", async (req, res) => {
+            try {
+                const applications = await applicationsCollection.find().sort({ createdAt: -1 }).toArray();
+                res.send(applications);
+            } catch (error) {
+                console.error("Failed to fetch applications", error);
+                res.status(500).send({ message: "Failed to fetch applications." });
             }
         });
     } catch (error) {
