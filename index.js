@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const cors = require('cors');
 const app = express();
@@ -146,6 +146,42 @@ async function run() {
             } catch (error) {
                 console.error("Failed to fetch applications", error);
                 res.status(500).send({ message: "Failed to fetch applications." });
+            }
+        });
+
+        app.patch("/applications/:id", async (req, res) => {
+            try {
+                const { id } = req.params;
+                const { status } = req.body;
+
+                if (!ObjectId.isValid(id)) {
+                    return res.status(400).send({ message: "Invalid application id." });
+                }
+
+                const filter = { _id: new ObjectId(id) };
+                const updateDoc = { $set: { status } };
+                const result = await applicationsCollection.updateOne(filter, updateDoc);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to update application", error);
+                res.status(500).send({ message: "Failed to update application." });
+            }
+        });
+
+        app.delete("/applications/:id", async (req, res) => {
+            try {
+                const { id } = req.params;
+
+                if (!ObjectId.isValid(id)) {
+                    return res.status(400).send({ message: "Invalid application id." });
+                }
+
+                const filter = { _id: new ObjectId(id) };
+                const result = await applicationsCollection.deleteOne(filter);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to delete application", error);
+                res.status(500).send({ message: "Failed to delete application." });
             }
         });
 
