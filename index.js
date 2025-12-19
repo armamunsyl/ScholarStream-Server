@@ -29,6 +29,7 @@ async function run() {
         const usersCollection = db.collection("users");
         const scholarshipsCollection = db.collection("scholarships");
         const applicationsCollection = db.collection("applications");
+        const reviewsCollection = db.collection("reviews");
 
         app.post("/users", async (req, res) => {
             try {
@@ -115,14 +116,18 @@ async function run() {
 
         app.post("/applications", async (req, res) => {
             try {
-                const { studentEmail, studentName, universityName } = req.body;
+                const { studentEmail, studentName, universityName, applicationFees, universityAddress,scholarshipId,scholarshipName } = req.body;
 
                 const application = {
                     studentEmail,
                     studentName,
                     universityName,
+                    scholarshipName,
                     status: "pending",
                     payment: "unpaid",
+                    applicationFees,
+                    universityAddress,
+                    scholarshipId,
                     createdAt: new Date()
                 };
 
@@ -141,6 +146,40 @@ async function run() {
             } catch (error) {
                 console.error("Failed to fetch applications", error);
                 res.status(500).send({ message: "Failed to fetch applications." });
+            }
+        });
+
+        app.post("/reviews", async (req, res) => {
+            try {
+                const { userName, userPhotoURL, comment, rating, scholarshipId , userEmail,scholarshipName,universityName} = req.body;
+
+                const review = {
+                    userName,
+                    userEmail,
+                    scholarshipName,
+                    universityName,
+                    userPhotoURL,
+                    comment,
+                    rating,
+                    scholarshipId,
+                    createdAt: new Date()
+                };
+
+                const result = await reviewsCollection.insertOne(review);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to create review", error);
+                res.status(500).send({ message: "Failed to create review." });
+            }
+        });
+
+        app.get("/reviews", async (req, res) => {
+            try {
+                const reviews = await reviewsCollection.find().sort({ createdAt: -1 }).toArray();
+                res.send(reviews);
+            } catch (error) {
+                console.error("Failed to fetch reviews", error);
+                res.status(500).send({ message: "Failed to fetch reviews." });
             }
         });
     } catch (error) {
