@@ -138,6 +138,44 @@ async function run() {
             }
         });
 
+        app.patch("/scholarships/:id", async (req, res) => {
+            try {
+                const { id } = req.params;
+                console.log(id);
+                const updateData = req.body;
+
+                if (!ObjectId.isValid(id)) {
+                    return res.status(400).send({ message: "Invalid scholarship id." });
+                }
+
+                const filter = { _id: new ObjectId(id) };
+                const updateDoc = { $set: updateData };
+                const result = await scholarshipsCollection.updateOne(filter, updateDoc);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to update scholarship", error);
+                res.status(500).send({ message: "Failed to update scholarship." });
+            }
+        });
+
+        app.delete("/scholarships/:id", async (req, res) => {
+            try {
+                const { id } = req.params;
+                console.log(id)
+
+                if (!ObjectId.isValid(id)) {
+                    return res.status(400).send({ message: "Invalid scholarship id." });
+                }
+
+                const filter = { _id: new ObjectId(id) };
+                const result = await scholarshipsCollection.deleteOne(filter);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to delete scholarship", error);
+                res.status(500).send({ message: "Failed to delete scholarship." });
+            }
+        });
+
         app.post("/applications", async (req, res) => {
             try {
                 const { studentEmail, studentName, universityName, applicationFees, universityAddress,scholarshipId,scholarshipName } = req.body;
