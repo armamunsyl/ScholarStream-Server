@@ -141,7 +141,7 @@ async function run() {
         app.patch("/scholarships/:id", async (req, res) => {
             try {
                 const { id } = req.params;
-                console.log(id);
+              
                 const updateData = req.body;
 
                 if (!ObjectId.isValid(id)) {
@@ -161,7 +161,7 @@ async function run() {
         app.delete("/scholarships/:id", async (req, res) => {
             try {
                 const { id } = req.params;
-                console.log(id)
+               
 
                 if (!ObjectId.isValid(id)) {
                     return res.status(400).send({ message: "Invalid scholarship id." });
