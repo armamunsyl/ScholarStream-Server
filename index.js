@@ -61,6 +61,30 @@ async function run() {
             }
         });
 
+        app.patch("/users/:id/role", async (req, res) => {
+            try {
+                const { id } = req.params;
+                const { role } = req.body;
+
+                if (!ObjectId.isValid(id)) {
+                    return res.status(400).send({ message: "Invalid user id." });
+                }
+
+                const validRoles = ["admin", "moderator", "student"];
+                if (!validRoles.includes(role)) {
+                    return res.status(400).send({ message: "role must be admin, moderator, or student." });
+                }
+
+                const filter = { _id: new ObjectId(id) };
+                const updateDoc = { $set: { role } };
+                const result = await usersCollection.updateOne(filter, updateDoc);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to update user role", error);
+                res.status(500).send({ message: "Failed to update user role." });
+            }
+        });
+
         app.post("/scholarships", async (req, res) => {
             try {
                 const {
