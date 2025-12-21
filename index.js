@@ -280,6 +280,42 @@ async function run() {
                 res.status(500).send({ message: "Failed to fetch reviews." });
             }
         });
+
+        app.patch("/reviews/:id", async (req, res) => {
+            try {
+                const { id } = req.params;
+                const updateData = req.body;
+
+                if (!ObjectId.isValid(id)) {
+                    return res.status(400).send({ message: "Invalid review id." });
+                }
+
+                const filter = { _id: new ObjectId(id) };
+                const updateDoc = { $set: updateData };
+                const result = await reviewsCollection.updateOne(filter, updateDoc);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to update review", error);
+                res.status(500).send({ message: "Failed to update review." });
+            }
+        });
+
+        app.delete("/reviews/:id", async (req, res) => {
+            try {
+                const { id } = req.params;
+
+                if (!ObjectId.isValid(id)) {
+                    return res.status(400).send({ message: "Invalid review id." });
+                }
+
+                const filter = { _id: new ObjectId(id) };
+                const result = await reviewsCollection.deleteOne(filter);
+                res.send(result);
+            } catch (error) {
+                console.error("Failed to delete review", error);
+                res.status(500).send({ message: "Failed to delete review." });
+            }
+        });
     } catch (error) {
         console.error("Failed to initialize database", error);
     }
