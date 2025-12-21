@@ -3,15 +3,17 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require("jsonwebtoken");
 const Stripe = require("stripe");
 const admin = require("firebase-admin");
-const serviceAccount = require("./config/serviceAccountKey.json");
 require('dotenv').config();
 const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 3000;
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
-});
+if (!admin.apps.length) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
+    admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+    });
+}
 
 app.use(cors());
 app.use(express.json());
