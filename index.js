@@ -532,6 +532,9 @@ async function run() {
 }
 run().catch(console.dir);
 
-app.listen(port, () => {
-    console.log(`Scholarship server is running on port: ${port}`);
-});
+module.exports = app;
+
+
+// app.listen(port, () => {
+//     console.log(`Scholarship server is running on port: ${port}`);
+// });
