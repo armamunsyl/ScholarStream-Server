@@ -247,7 +247,36 @@ async function run() {
 
         app.get("/scholarships", async (req, res) => {
             try {
-                const scholarships = await scholarshipsCollection.find().sort({ createdAt: -1 }).toArray();
+                const { search, category, sort } = req.query;
+                const filters = [];
+
+                if (search) {
+                    const regex = new RegExp(search, "i");
+                    filters.push({
+                        $or: [
+                            { scholarshipName: { $regex: regex } },
+                            { universityName: { $regex: regex } },
+                            { degree: { $regex: regex } }
+                        ]
+                    });
+                }
+
+                if (category && category !== "all") {
+                    filters.push({ scholarshipCategory: category });
+                }
+
+                const query = filters.length ? { $and: filters } : {};
+                const sortOptions = {
+                    date_desc: { createdAt: -1 },
+                    fee_asc: { applicationFees: 1 },
+                    fee_desc: { applicationFees: -1 }
+                };
+                const sortConfig = sortOptions[sort] || sortOptions.date_desc;
+
+                const scholarships = await scholarshipsCollection
+                    .find(query)
+                    .sort(sortConfig)
+                    .toArray();
                 res.send(scholarships);
             } catch (error) {
                 console.error("Failed to fetch scholarships", error);
