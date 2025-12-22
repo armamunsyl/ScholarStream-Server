@@ -118,6 +118,11 @@ async function run() {
             try {
                 const { name, email, photoURL, createdAt } = req.body;
 
+                const existingUser = await usersCollection.findOne({ email });
+                if (existingUser) {
+                    return res.status(200).send({ acknowledged: true, insertedId: existingUser._id });
+                }
+
                 const user = {
                     name,
                     email,
