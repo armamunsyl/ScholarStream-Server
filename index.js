@@ -68,7 +68,7 @@ app.post("/jwt", (req, res) => {
 
 async function run() {
     try {
-        await client.connect();
+        // await client.connect();
         const db = client.db("scholarshipDB");
         const usersCollection = db.collection("users");
         const scholarshipsCollection = db.collection("scholarships");
@@ -532,9 +532,9 @@ async function run() {
 }
 run().catch(console.dir);
 
-module.exports = app;
+// module.exports = app;
 
 
-// app.listen(port, () => {
-//     console.log(`Scholarship server is running on port: ${port}`);
-// });
+app.listen(port, () => {
+    console.log(`Scholarship server is running on port: ${port}`);
+});
