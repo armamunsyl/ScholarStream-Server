@@ -271,17 +271,37 @@ async function run() {
                 }
 
                 const query = filters.length ? { $and: filters } : {};
-                const sortOptions = {
-                    date_desc: { createdAt: -1 },
-                    fee_asc: { applicationFees: 1 },
-                    fee_desc: { applicationFees: -1 }
-                };
-                const sortConfig = sortOptions[sort] || sortOptions.date_desc;
+                const pipeline = [];
 
-                const scholarships = await scholarshipsCollection
-                    .find(query)
-                    .sort(sortConfig)
-                    .toArray();
+                if (Object.keys(query).length) {
+                    pipeline.push({ $match: query });
+                }
+
+                if (sort === "fee_asc" || sort === "fee_desc") {
+                    pipeline.push({
+                        $addFields: {
+                            applicationFeesValue: {
+                                $convert: {
+                                    input: "$applicationFees",
+                                    to: "double",
+                                    onError: 0,
+                                    onNull: 0
+                                }
+                            }
+                        }
+                    });
+                    pipeline.push({
+                        $sort: {
+                            applicationFeesValue: sort === "fee_asc" ? 1 : -1,
+                            createdAt: -1
+                        }
+                    });
+                    pipeline.push({ $project: { applicationFeesValue: 0 } });
+                } else {
+                    pipeline.push({ $sort: { createdAt: -1 } });
+                }
+
+                const scholarships = await scholarshipsCollection.aggregate(pipeline).toArray();
                 res.send(scholarships);
             } catch (error) {
                 console.error("Failed to fetch scholarships", error);
