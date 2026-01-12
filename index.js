@@ -149,6 +149,40 @@ async function run() {
             }
         });
 
+        app.patch("/users/profile", verifyJWT, async (req, res) => {
+            try {
+                const { name, photoURL } = req.body || {};
+
+                if (!name && !photoURL) {
+                    return res.status(400).send({ message: "Nothing to update." });
+                }
+
+                const email = req.decoded?.email;
+                if (!email) {
+                    return res.status(403).send({ message: "Forbidden access" });
+                }
+
+                const updateFields = {};
+                if (name) updateFields.name = name;
+                if (photoURL) updateFields.photoURL = photoURL;
+
+                const result = await usersCollection.findOneAndUpdate(
+                    { email },
+                    { $set: updateFields },
+                    { returnDocument: "after" }
+                );
+
+                if (!result.value) {
+                    return res.status(404).send({ message: "User not found." });
+                }
+
+                res.send(result.value);
+            } catch (error) {
+                console.error("Failed to update user profile", error);
+                res.status(500).send({ message: "Failed to update user profile." });
+            }
+        });
+
         app.delete("/users/:id", verifyJWT, verifyAdmin, async (req, res) => {
             try {
                 const { id } = req.params;
